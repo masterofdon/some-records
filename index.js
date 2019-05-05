@@ -1,36 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const MongoClient = require('mongodb').MongoClient;
 const validator = require("./validator/getir-validation");
-
-const url = 'mongodb://dbUser:dbPassword1@ds249623.mlab.com:49623/getir-case-study';
-
-const dbName = 'getir-case-study';
-
-const servererrors = require("./constants/servererrors");
-const serverresps = require("./constants/serverresps");
-
-const LANGS = ["EN", "TR"];
-var prefLang = LANGS[0];
+const dbclient = require('./db/dbclient');
 
 const port = 3000;
 const app = express();
 
-const mongoConfig = {
-    useNewUrlParser: true,
-};
-var dbConnection = undefined;
-
-MongoClient.connect(url, mongoConfig, function (err, db) {
-    if (err) {
-        console.error(servererrors.db.err_0001[prefLang]);
-        throw err;
-    }
-
-    dbConnection = db.db(dbName);
-    console.log(serverresps.db.resp_0001[prefLang]);
-});
+dbclient.connect();
 
 app.use(morgan('combined'));
 
@@ -43,21 +20,19 @@ app.post('/api/records', (req, res) => {
     const minCountVal = validator.countValidator(req.body.minCount);
     const maxCountVal = validator.countValidator(req.body.maxCount);
     if(!(startDateVal && endDateVal && minCountVal && maxCountVal)){
-        res.status = 400;
-        res.json({ message : "Error in Request Params"});
+        res.status(400).send({ message : "Format Error in Request Body"});
         return;
     }
-    if(req.body.maxCount < req.body.minCount){
-        res.status = 400;
-        res.json({ message : "maxCount Should Be Greater Than minCount"});
+    if((req.body.maxCount < req.body.minCount) || (req.body.startDate > req.body.endDate)){
+        res.status(400).send({ message : "Logical Error in Request Body" });
         return;
     }
-    if(!dbConnection){
+    if(!dbclient.getDBConnection()){
         res.status = 500;
         res.json({ message : "Not Connected To Database"});
         return;
     }
-    const records = dbConnection.collection("records");
+    const records = dbclient.getDBConnection().collection("records");
     records.aggregate([
         { $match: { "createdAt": { $gte: new Date(`${req.body.startDate}T00:00:00.000Z`) } } },
         { $match: { "createdAt": { $lt: new Date(`${req.body.endDate}T00:00:00.000Z`) } } },

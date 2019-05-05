@@ -4,9 +4,9 @@
   "description": "Getir Interview Showcase",
   "main": "index.js",
   "scripts": {
-    "test": "npm test -- --coverage",
-    "start" : "node index.js",
-    "dev" : "nodemon index.js"
+    "test": "jest --env=node",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
     "morgan": "^1.9.1"
   },
   "devDependencies": {
+    "axios": "^0.18.0",
     "jest": "^24.7.1"
   }
 }
