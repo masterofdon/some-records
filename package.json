@@ -17,6 +17,9 @@
     "rest",
     "api"
   ],
+  "engines": {
+    "node": "8.9.3"
+  },
   "author": "Erdem A. Ekin",
   "license": "ISC",
   "bugs": {
