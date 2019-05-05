@@ -56,4 +56,4 @@ app.post('/api/records', (req, res) => {
     // Maybe a timeout and alarm here.
 });
 
-app.listen(port);
+app.listen(process.env.PORT || port);
