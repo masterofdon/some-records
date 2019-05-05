@@ -3,6 +3,11 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const validator = require("./validator/getir-validation");
 const dbclient = require('./db/dbclient');
+const servererrors = require("./constants/servererrors");
+const serverresps = require("./constants/serverresps");
+
+const LANGS = ["EN", "TR"];
+var prefLang = LANGS[0];
 
 const port = 8080;
 const app = express();
@@ -20,16 +25,15 @@ app.post('/api/records', (req, res) => {
     const minCountVal = validator.countValidator(req.body.minCount);
     const maxCountVal = validator.countValidator(req.body.maxCount);
     if(!(startDateVal && endDateVal && minCountVal && maxCountVal)){
-        res.status(400).send({ message : "Format Error in Request Body"});
+        res.status(400).send({ code : 401 , msg : servererrors.api.err_0001[prefLang] });
         return;
     }
     if((req.body.maxCount < req.body.minCount) || (req.body.startDate > req.body.endDate)){
-        res.status(400).send({ message : "Logical Error in Request Body" });
+        res.status(400).send({ code : 402 , msg : servererrors.api.err_0002[prefLang] });
         return;
     }
     if(!dbclient.getDBConnection()){
-        res.status = 500;
-        res.json({ message : "Not Connected To Database"});
+        res.status(500).send({ message : servererrors.db.err_0002[prefLang] });
         return;
     }
     const records = dbclient.getDBConnection().collection("records");
