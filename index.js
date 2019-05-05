@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const validator = require("./validator/getir-validation");
 const dbclient = require('./db/dbclient');
 
-const port = 80;
+const port = 8080;
 const app = express();
 
 dbclient.connect();
